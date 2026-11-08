@@ -2,6 +2,8 @@
 
 Coordinate dog-park visits without creating an app account. Visitors can select a park, optionally enter a nickname, and mark **Here**, **Considering**, or **None**. Active statuses last 45 minutes unless removed earlier.
 
+[Open Bark](https://bark.lavish-ounce.workers.dev/)
+
 ## Architecture
 
 ```text
