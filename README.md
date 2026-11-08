@@ -2,7 +2,7 @@
 
 Coordinate dog-park visits without creating an app account. Visitors can select a park, optionally enter a nickname, and mark **Here**, **Considering**, or **None**. Active statuses last 45 minutes unless removed earlier.
 
-[Open Bark](https://bark.lavish-ounce.workers.dev/)
+[Open Bark](https://bark.romaneski30.workers.dev/)
 
 ## Architecture
 
@@ -26,7 +26,7 @@ The runtime configuration is reconstructed from the inspected deployment and tes
 - Public assets directory: `site`, bound as `ASSETS`.
 - SPA fallback: missing frontend paths return `index.html`, matching the observed deployment.
 - `/api/*` requests run the Worker first, not the SPA fallback.
-- `ACTIVITY`: references the existing namespace. `remote: false` keeps local development from using production KV; it does not replace the production binding.
+- `ACTIVITY`: references the new namespace in the Cloudflare account containing the atlas. `remote: false` keeps local development from using production KV; it does not replace the production binding.
 
 No deployed files or backend logic were changed while adding configuration. The recovery `manifest.json` identifies the imported Worker/HTML/JS/CSS bytes, not the later documentation or configuration files. Existing `readme.txt` preserves the earlier backup checkpoint and its limitations.
 
@@ -41,22 +41,28 @@ Use Node.js 22 or newer; `.node-version` pins the validated Node 22.14.0 runtime
 
 Runtime/asset/API and browser checks were conducted locally using synthetic data only. The test code and its observed results are recorded separately; this repository has the backend mock tests, not a configured GitHub Actions suite. No production park/status API requests were made during validation.
 
-## Connect the existing Worker — only after reviewing this configuration
+## Hosting and future updates
 
-This repository alone does not migrate Cloudflare hosting. Keep the existing Worker in its current Cloudflare account to preserve the website address and existing KV namespace.
+Bark is hosted in the same preferred Cloudflare account as the air-brake atlas. Both projects' repositories belong to the `romaneski30` GitHub account. Bark uses Cloudflare Workers, whereas the atlas uses Pages.
 
-In that Worker's **Settings → Builds**, connect this repository under the preferred GitHub account. Review the full connection form before saving:
+The destination build and deployment succeeded, the public HTML/JavaScript/CSS matched the locally tested files, health/share endpoints were checked, and the owner confirmed that the new website looks correct. No production park/status API calls or synthetic visitor check-ins were made during automated verification.
+
+Bark uses a new ACTIVITY namespace in the destination account. It started empty: visitor activity was not copied from the original account. The old Lavish Ounce hosting remains a fallback with automatic builds disabled; it is not the target for future updates.
+
+The destination build settings are:
 
 - Production branch: `main`.
-- Root directory: repository root.
-- Node.js: 22 or newer.
-- Build command: `npm run check` (uses the pinned dependency version installed from `package-lock.json`).
+- Root directory: `/` (repository root).
+- Node.js: `22.14.0`, set using `NODE_VERSION` and `.node-version`.
+- Build command: `npm run check` (uses the pinned dependencies installed from `package-lock.json`).
 - Deploy command: `npm run deploy` (uses `wrangler deploy --keep-vars`, preserving dashboard variables).
-- Keep previews disabled for the initial connection until their resource isolation is reviewed.
+- Preview builds: disabled until separate preview storage and resource isolation are reviewed.
 
-Do not select the atlas's Pages workflow or `exit 0`/output-directory fields for this Worker. Use the existing Worker's account, not a newly created Worker in another account. Saving the build connection may trigger production deployment: review it before committing that action. Do not copy secrets into the public repository or share API tokens.
+To update Bark, save changes on a branch, run local checks, review the pull request, and merge into `main` when ready to publish. Commits to `main`, including documentation-only changes, trigger the destination production build. Unlike the atlas, Bark currently does not generate automatic branch previews.
 
-No account ID or API token is stored in this repository. Cloudflare's existing Worker build connection supplies the target-account authorization. The KV namespace ID is a resource reference, not an authorization credential. Deploying in a different account will not preserve that storage or the old account-based website address.
+Do not use the atlas's Pages workflow or `exit 0`/output-directory settings for Bark. Future deployments must target the preferred Cloudflare account and the ACTIVITY namespace in `wrangler.jsonc`. Sharing controls derive the new site address from the browser's origin; old externally shared links or saved QR images do not update automatically.
+
+Cloudflare supplies build authorization; no API token is stored in this repository. The KV namespace ID is a resource reference, not an authorization credential. Do not place secrets or exported visitor records in the public repository.
 
 ## Important limits retained from the deployed app
 
